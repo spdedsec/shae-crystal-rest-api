@@ -279,29 +279,31 @@ server = HTTP::Server.new do |context|
   end
 
   # Health check & root route
-  if (path == "/" || path == "/health") && method == "GET"
+  if (path == "/" || path == "/health") && (method == "GET" || method == "HEAD")
     accept = req.headers["Accept"]? || ""
     if path == "/" && accept.includes?("text/html")
       context.response.content_type = "text/html; charset=utf-8"
       context.response.status = HTTP::Status::OK
-      context.response.print HTML_UI
+      context.response.print HTML_UI unless method == "HEAD"
     else
       context.response.content_type = "application/json"
       context.response.status = HTTP::Status::OK
-      context.response.print({
-        "status" => "ok",
-        "service" => "shae-crystal-rest-api",
-        "version" => "1.0.0",
-        "design" => "Apple HIG"
-      }.to_json)
+      unless method == "HEAD"
+        context.response.print({
+          "status" => "ok",
+          "service" => "shae-crystal-rest-api",
+          "version" => "1.0.0",
+          "design" => "Apple HIG"
+        }.to_json)
+      end
     end
-  elsif method == "GET" && path == "/items"
+  elsif (method == "GET" || method == "HEAD") && path == "/items"
     context.response.content_type = "application/json"
     result = items.keys.map do |k|
       {"id" => k, "data" => items[k]["data"]}
     end
     context.response.status = HTTP::Status::OK
-    context.response.print result.to_json
+    context.response.print result.to_json unless method == "HEAD"
   elsif method == "POST" && path == "/items"
     context.response.content_type = "application/json"
     body = req.body.try(&.gets_to_end) || "{}"
