@@ -288,12 +288,12 @@ server = HTTP::Server.new do |context|
     else
       context.response.content_type = "application/json"
       context.response.status = HTTP::Status::OK
-      context.response.print JSON.generate({
+      context.response.print({
         "status" => "ok",
         "service" => "shae-crystal-rest-api",
         "version" => "1.0.0",
         "design" => "Apple HIG"
-      })
+      }.to_json)
     end
   elsif method == "GET" && path == "/items"
     context.response.content_type = "application/json"
@@ -301,7 +301,7 @@ server = HTTP::Server.new do |context|
       {"id" => k, "data" => items[k]["data"]}
     end
     context.response.status = HTTP::Status::OK
-    context.response.print JSON.generate(result)
+    context.response.print result.to_json
   elsif method == "POST" && path == "/items"
     context.response.content_type = "application/json"
     body = req.body.try(&.gets_to_end) || "{}"
@@ -311,35 +311,35 @@ server = HTTP::Server.new do |context|
       data_str = data["data"]?.try(&.as_s?) || ""
       items[id] = {"data" => data_str}
       context.response.status = HTTP::Status::CREATED
-      context.response.print JSON.generate({"id" => id, "status" => "created"})
+      context.response.print({"id" => id, "status" => "created"}.to_json)
     rescue ex
       context.response.status = HTTP::Status::BAD_REQUEST
-      context.response.print JSON.generate({"error" => "invalid json", "details" => ex.message})
+      context.response.print({"error" => "invalid json", "details" => ex.message}.to_json)
     end
   elsif method == "GET" && path.starts_with?("/items/")
     context.response.content_type = "application/json"
     id = path.split("/").last
     if items.has_key?(id)
       context.response.status = HTTP::Status::OK
-      context.response.print JSON.generate({"id" => id, "data" => items[id]["data"]})
+      context.response.print({"id" => id, "data" => items[id]["data"]}.to_json)
     else
       context.response.status = HTTP::Status::NOT_FOUND
-      context.response.print JSON.generate({"error" => "item not found"})
+      context.response.print({"error" => "item not found"}.to_json)
     end
   elsif method == "DELETE" && path.starts_with?("/items/")
     context.response.content_type = "application/json"
     id = path.split("/").last
     if items.delete(id)
       context.response.status = HTTP::Status::OK
-      context.response.print JSON.generate({"status" => "deleted", "id" => id})
+      context.response.print({"status" => "deleted", "id" => id}.to_json)
     else
       context.response.status = HTTP::Status::NOT_FOUND
-      context.response.print JSON.generate({"error" => "item not found"})
+      context.response.print({"error" => "item not found"}.to_json)
     end
   else
     context.response.content_type = "application/json"
     context.response.status = HTTP::Status::NOT_FOUND
-    context.response.print JSON.generate({"error" => "route not found", "path" => path})
+    context.response.print({"error" => "route not found", "path" => path}.to_json)
   end
 end
 

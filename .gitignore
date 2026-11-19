@@ -2,3 +2,4 @@ shae-rest-api
 dist/
 *.o
 .vercel
+.env*
