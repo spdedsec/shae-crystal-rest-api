@@ -1,27 +1,40 @@
-# SHAE Crystal REST API
+# Crystal REST API
 
-A minimal REST API written in Crystal.
+A high-performance RESTful API written in Crystal and deployed on Vercel Fluid compute containers, featuring an embedded Apple Human Interface Guidelines (HIG) API Explorer.
 
 ## Features
-- GET /items — list items
-- POST /items — create item (JSON body)
-- GET /items/:id — get item
-- DELETE /items/:id — delete item
-- JSON responses, in-memory storage
 
-## Install
+- **Apple HIG API Explorer** — Interactive browser UI with light/dark mode and SF Pro typography
+- **Container Architecture** — Multi-stage OCI container built on Alpine Linux with non-root user execution
+- **REST Endpoints** — In-memory CRUD operations with UUID generation
+- **CORS Support** — Full CORS headers for web and mobile frontends
+- **Health Checks** — Native healthcheck probe on `/` and `/health`
+- **Dynamic Port Binding** — Binds to `$PORT` environment variable with fallback to 8080
+
+## Endpoints
+
+| Method | Route | Description | Response |
+|--------|-------|-------------|----------|
+| `GET` | `/` | Apple HIG Web UI (Browser) / Service Status (JSON) | HTML / 200 JSON |
+| `GET` | `/health` | Healthcheck probe | 200 JSON |
+| `GET` | `/items` | List all items | 200 JSON |
+| `POST` | `/items` | Create new item (`{"data":"..."}`) | 201 JSON |
+| `GET` | `/items/{id}` | Get item by ID | 200 / 404 JSON |
+| `DELETE` | `/items/{id}` | Delete item by ID | 200 / 404 JSON |
+
+## Local Development (Docker)
+
 ```bash
-./scripts/install.sh
-# Or manually:
-crystal build src/rest_api.cr -o shae-rest-api --release
-cp shae-rest-api ~/.local/bin/
+docker build -t crystal-rest-api .
+docker run -p 8080:8080 crystal-rest-api
 ```
 
-## Usage
-```bash
-shae-rest-api
-# API listens on http://0.0.0.0:8080
-```
+Visit `http://localhost:8080`.
 
-## Design
-Follows SHAE Field Manual: warm paper #F2EEE5, ink #191712, oxide #B3341B, 0px radius, 1px borders.
+## Deployment
+
+Configured for Vercel with `"framework": "container"` and multi-stage Docker build.
+
+## License
+
+MIT © 2026 spdedsec
